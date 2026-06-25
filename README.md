@@ -9,10 +9,9 @@ For storage of these files, I have made the use of Google Cloud Storage Buckets.
 
 To process these data, the map-reduce creates intermediate files which are also stored in the Buckets. 
 
-I have also developed an interactive website to upload new files of new upcoming books to the corpus as well as make a search of a particular keyword. 
-
 The end-to-end search engine was implemented using Flask framework which was then deployed on Google Cloud Run.
 
+ <img width="1600" height="887" alt="architecture diagram" src="https://github.com/user-attachments/assets/27814a91-10e0-4775-b93e-ace4021a3496" />
 
 
 ### Prerequisites.  
@@ -35,15 +34,19 @@ They also contain their respective `requirements.txt` files consisting of the ne
 ### Files.
 The Map-Reduce folder contains all the necessary cloud functions (FaaS).
 
-•	`Function-master` – Contains all the necessary files required for the Master process.  
-•	`Function-create-chunks` – Contains all the necessary files required for creating the chunks of the data.  
-•	`Function-mapper` – Contains all the necessary files required for running the defined number of masters in parallel.  
-•	`Function-shufflesort` – Contains all the necessary files required for the grouping and redirecting words to reducers using hashing.  
-•	`Function-reducer` – Contains all the necessary files required for the reducer process.  
-•	`Function-search` – Contains all the necessary files required for searching the keyword from the website.  
-•	`Function-gcs-bucket-trigger` – Contains all the necessary files required for handling the new incoming files and linking the bucket to the Map-Reduce system.  
+• Function-master – Orchestrates the MapReduce workflow.
 
-The remaining files on repository are all the necessary web development files required for flask app along with Google Cloud Run Deployment.
+• Function-create-chunks – Splits input documents into chunks.
+
+• Function-mapper – Processes chunks and generates intermediate key-value pairs.
+
+• Function-shufflesort – Groups and routes keys to reducers using hashing.
+
+• Function-reducer – Aggregates mapper outputs and builds the index.
+
+• Function-search – Handles keyword search requests.
+
+• Function-gcs-bucket-trigger – Triggers indexing when new files are uploaded to Cloud Storage. 
 
 
 ### Execution Instructions.
@@ -56,31 +59,64 @@ Create the exact same functions in Google Cloud with the same name, code , files
 •	On uploading these files, the map-reduce system will create inverted index of the words in the books and store it in Google Cloud Storage Buckets.  
 •	Use the `search` functionality to search for the frequency of the keywords apprearing in different books.  
 
+## Architecture Summary
+
+1. User Uploads Book
+
+        ↓
+3. File stored in Google Cloud Storage (Dataset Bucket)
+    
+        ↓   
+5. Cloud Storage Trigger activates
+    
+        ↓
+7. Master Orchestrator starts processing
+
+        ↓
+9. Document is cleaned & split into chunks
+
+        ↓
+11. Mapper functions run in parallel
+
+        ↓
+13. Intermediate key-value pairs generated
+
+        ↓
+15. Shuffle & Sort groups data by keywords
+
+        ↓
+17. Reducer functions aggregate results
+
+         ↓
+19. Inverted Index is created/stored
+
+         ↓
+21. Search API queries the index
+
+          ↓
+23. Web Dashboard displays results to user
+
 ### Map-Reduce Design.
 
 #### Master.
 The master plays a big part of this map-reduce system where it controls the whole process and ensures serial as well as parallel execution of the respective processes.
 
-When a file has been uploaded from the website, it gets uploaded in the `books-dataset` bucket which in turn triggers the cloud function `gcs-bucket-trigger`. 
+•When a file has been uploaded from the website, it gets uploaded in the `books-dataset` bucket which in turn triggers the cloud function `gcs-bucket-trigger`. 
 
-This function then calls the main master program with the parameters as filename to fetch and process the file which was just uploaded.
+•This function then calls the main master program with the parameters as filename to fetch and process the file which was just uploaded.
 
-The master first creates chunks of this file based on the number of mappers defined in the `configFile.py`. 
+•The master first creates chunks of this file based on the number of mappers defined in the `configFile.py`. 
 
-Once the chunks are created the master creates a pool of multiprocessing tasks in parallel to process these chunks.
+•Once the chunks are created the master creates a pool of multiprocessing tasks in parallel to process these chunks.
 
-On completion of the mapping process, it turns to the Shuffle and Sorting algorithm function which groups the words based on their hash value and number of reducers.
-
-Finally, it calls the reducer to process these sorted and grouped output and update/create the final inverted index.
-
-In a nutshell, the master servers as an organiser orchestrating the whole map-reduce and ensures that the barrier has been implemented perfectly.
+•On completion of the mapping process, it turns to the Shuffle and Sorting algorithm function which groups the words based on their hash value and number of reducers.
 
 #### Chunks.
-The chunks creation process is an important one since this is the stage the books are being read as input and based on this data the whole efficiency of the map-reduce is going to be dependent. Thus, the incoming data needs to be pre-processed and cleaned so that our indexing is done appropriately.
+•The chunks creation process is an important one since this is the stage the books are being read as input and based on this data the whole efficiency of the map-reduce is going to be dependent. Thus, the incoming data needs to be pre-processed and cleaned so that our indexing is done appropriately.
 
-In this regard, I have made the use of python library **SpaCy** which vectorizes each word and cleans all the spaces, punctuations, junk characters and other impurities. 
+•In this regard, I have made the use of python library **SpaCy** which vectorizes each word and cleans all the spaces, punctuations, junk characters and other impurities. 
 
-SpaCy is known for its speed and efficiency, making it suitable for processing large volumes of text data.
+•SpaCy is known for its speed and efficiency, making it suitable for processing large volumes of text data.
 
 Once the vectorization of the words is completed then onwards it is a simple function which gets the number of mappers and filename as input parameters and divides the file into that many number of chunks.
 
