@@ -13,7 +13,7 @@ I have also developed an interactive website to upload new files of new upcoming
 
 The end-to-end search engine was implemented using Flask framework which was then deployed on Google Cloud Run.
 
-![System Architecture - Verbose Vista](./Verbose-Vista.png)
+
 
 ### Prerequisites.  
 •	Install Google SDK in your local machine to access Google Cloud Platform.    
