@@ -1,1 +1,1 @@
-# Verbose-Vista-Scalable-Document-Search-Engine-Using-MapReduce
+# Verbose-Vista:Scalable Document Search Engine Using MapReduce
