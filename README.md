@@ -76,6 +76,7 @@ Create the exact same functions in Google Cloud with the same name, code , files
 9. Document is cleaned & split into chunks
 
         ↓
+   
 11. Mapper functions run in parallel
 
         ↓
