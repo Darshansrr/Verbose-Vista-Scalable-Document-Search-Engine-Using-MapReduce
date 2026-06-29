@@ -181,3 +181,5 @@ Verbose Vista, a web application was also implemented with the functionality suc
 
 [1]:    https://www.gutenberg.org/ "Gutenberg Website"
 [2]:    https://verbose-vista-etlijojsoa-uc.a.run.app/ "Verbose Vista"
+
+
